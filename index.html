@@ -1,25 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Device Verification</title>
+  <title>Voucher Referral Bot - Device Verification</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #07152f, #0b3d91, #006eff);
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255, 255, 255, 0.97);
+      border-radius: 24px;
+      padding: 35px 25px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    }
+
+    .icon {
+      width: 85px;
+      height: 85px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #e8f1ff;
+      font-size: 42px;
+    }
+
+    h1 {
+      color: #09285f;
+      font-size: 25px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.6;
+      font-size: 15px;
+      margin-bottom: 25px;
+    }
+
+    .button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: block;
+      transition: 0.2s;
+    }
+
+    .verify {
+      background: #087cff;
+      color: white;
+    }
+
+    .verify:hover {
+      background: #0068dc;
+    }
+
+    .continue {
+      background: #16a34a;
+      color: white;
+      display: none;
+    }
+
+    .continue:hover {
+      background: #12823b;
+    }
+
+    .status {
+      display: none;
+      color: #159447;
+      font-weight: bold;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    .small {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
 </head>
+
 <body>
 
-  <h1>🔐 Device Verification</h1>
+  <div class="card">
 
-  <p>Before using Voucher Referral Bot, you need to complete device verification.</p>
+    <div class="icon" id="icon">🔐</div>
 
-  <button onclick="verify()">🔐 Verify Device</button>
+    <h1 id="title">Device Verification Required</h1>
+
+    <p id="message">
+      Before using Voucher Referral Bot, you need to complete a quick
+      device verification.
+    </p>
+
+    <button class="button verify" id="verifyButton" onclick="verifyDevice()">
+      🔐 Verify Device
+    </button>
+
+    <div class="status" id="status">
+      ✅ Device Verified
+    </div>
+
+    <a
+      class="button continue"
+      id="continueButton"
+      href="https://t.me/Voucherreferral_bot"
+    >
+      🤖 Continue to Voucher Referral Bot
+    </a>
+
+    <div class="small">
+      Voucher Referral Bot • Secure Verification
+    </div>
+
+  </div>
 
   <script>
-    function verify() {
-      alert("Device verification page is working!");
+    function verifyDevice() {
+
+      document.getElementById("icon").innerHTML = "✅";
+
+      document.getElementById("title").innerHTML =
+        "Device Verified";
+
+      document.getElementById("message").innerHTML =
+        "Your device verification has been completed successfully. You can now continue to Voucher Referral Bot.";
+
+      document.getElementById("verifyButton").style.display = "none";
+
+      document.getElementById("status").style.display = "block";
+
+      document.getElementById("continueButton").style.display = "block";
     }
   </script>
-
-  <h2>TEST PAGE</h2>
 
 </body>
 </html>
