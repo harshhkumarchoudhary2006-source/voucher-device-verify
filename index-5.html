@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#087cff">
+  <title>Voucher Referral Bot - Device Verification</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js?63"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #07152f, #0b3d91, #006eff);
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: rgba(255,255,255,.97);
+      border-radius: 24px;
+      padding: 35px 25px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+
+    .icon {
+      width: 85px;
+      height: 85px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #e8f1ff;
+      font-size: 42px;
+    }
+
+    h1 {
+      color: #09285f;
+      font-size: 25px;
+      margin-bottom: 15px;
+    }
+
+    p {
+      color: #555;
+      line-height: 1.6;
+      font-size: 15px;
+      margin-bottom: 25px;
+    }
+
+    .button {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      display: block;
+      transition: .2s;
+    }
+
+    .verify {
+      background: #087cff;
+      color: white;
+    }
+
+    .verify:disabled {
+      background: #9bbce8;
+      cursor: not-allowed;
+    }
+
+    .status {
+      display: none;
+      color: #159447;
+      font-weight: bold;
+      margin-bottom: 20px;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    .error {
+      display: none;
+      color: #dc2626;
+      font-weight: bold;
+      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .loading {
+      display: block;
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .small {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #888;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="icon" id="icon">🔐</div>
+
+    <h1 id="title">Device Verification Required</h1>
+
+    <p id="message">
+      Before using Voucher Referral Bot, you need to complete a quick
+      device verification.
+    </p>
+
+    <div class="loading" id="loading">Checking your Telegram device...</div>
+
+    <button
+      class="button verify"
+      id="verifyButton"
+      onclick="verifyDevice()"
+      disabled
+    >
+      🔐 Verify Device
+    </button>
+
+    <div class="status" id="status"></div>
+    <div class="error" id="error"></div>
+
+    <div class="small">
+      Voucher Referral Bot • Secure Verification
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    let deviceId = "";
+
+    function el(id) {
+      return document.getElementById(id);
+    }
+
+    function showError(text) {
+      el("icon").innerHTML = "❌";
+      el("title").innerHTML = "Verification Failed";
+      el("error").innerText = text;
+      el("error").style.display = "block";
+      el("status").style.display = "none";
+      el("loading").style.display = "none";
+      el("verifyButton").style.display = "block";
+      el("verifyButton").disabled = true;
+    }
+
+    function showReady() {
+      el("icon").innerHTML = "🔐";
+      el("title").innerHTML = "Device Verification";
+      el("message").innerHTML =
+        "Your Telegram device was detected. Tap the button below to complete verification.";
+      el("loading").style.display = "none";
+      el("error").style.display = "none";
+      el("verifyButton").style.display = "block";
+      el("verifyButton").disabled = false;
+    }
+
+    function showSending() {
+      el("verifyButton").style.display = "none";
+      el("error").style.display = "none";
+      el("loading").style.display = "block";
+      el("loading").innerText = "Sending device verification...";
+    }
+
+    function initTelegram() {
+      if (!tg) {
+        showError(
+          "Please open Verify My Device from inside Voucher Referral Bot on Telegram."
+        );
+        return;
+      }
+
+      try {
+        tg.ready();
+        tg.expand();
+      } catch (e) {}
+
+      const biometric = tg.BiometricManager;
+
+      if (!biometric) {
+        showError(
+          "This Telegram client does not provide the required device identifier. Please update Telegram and try again."
+        );
+        return;
+      }
+
+      try {
+        biometric.init(function () {
+          deviceId = String(biometric.deviceId || "").trim();
+
+          if (!deviceId) {
+            showError(
+              "Telegram did not provide a device identifier on this device. No referral point can be awarded."
+            );
+            return;
+          }
+
+          showReady();
+        });
+      } catch (e) {
+        showError(
+          "Telegram could not initialize device verification. Please close this page and open Verify My Device again from the bot."
+        );
+      }
+    }
+
+    function verifyDevice() {
+      if (!tg || !deviceId) {
+        showError(
+          "Device verification is not ready. Please close this page and open Verify My Device again from the bot."
+        );
+        return;
+      }
+
+      showSending();
+
+      /*
+       * IMPORTANT:
+       * We intentionally do NOT send tg.initData here.
+       * This page is launched from a Telegram keyboard Web App and
+       * the bot receives web_app_data tied to message.from_user.
+       *
+       * The device ID is sent to the bot. The BOT must enforce:
+       *   - same device used before -> 0 referral points
+       *   - self-referral -> 0 referral points
+       *   - valid new device/referral -> exactly +1 point
+       */
+      const payload = {
+        action: "verify_device",
+        device_id: deviceId
+      };
+
+      try {
+        tg.sendData(JSON.stringify(payload));
+
+        el("icon").innerHTML = "✅";
+        el("title").innerHTML = "Verification Sent";
+        el("loading").style.display = "none";
+        el("status").innerText =
+          "Device verification was sent successfully.\n\nReturn to the bot and tap “I've Referred”.";
+        el("status").style.display = "block";
+      } catch (e) {
+        showError(
+          "Telegram could not send the verification result. Please close this page and open Verify My Device again from the bot."
+        );
+      }
+    }
+
+    initTelegram();
+  </script>
+</body>
+</html>
